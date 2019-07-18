@@ -16,4 +16,4 @@ String _getPlatformLibraryName() {
 
 /// TensorFlowLite C library.
 DynamicLibrary tflitelib = DynamicLibrary.open(
-    path.join(Directory.current.path, _getPlatformLibraryName()));
+    path.join(Directory.current.path, 'lib', _getPlatformLibraryName()));
