@@ -4,9 +4,9 @@
 
 import 'dart:ffi';
 import 'dart:io';
-import 'package:path/path.dart' as p;
+import 'package:path/path.dart' as path;
 
-String getPlatformLibraryName() {
+String _getPlatformLibraryName() {
   if (Platform.isLinux) {
     return 'libtensorflowlite_c-linux.so';
   }
@@ -16,4 +16,4 @@ String getPlatformLibraryName() {
 
 /// TensorFlowLite C library.
 DynamicLibrary tflitelib = DynamicLibrary.open(
-    p.join(Directory.current.path, 'so', getPlatformLibraryName()));
+    path.join(Directory.current.path, _getPlatformLibraryName()));

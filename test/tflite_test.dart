@@ -3,11 +3,11 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:io';
-import 'package:path/path.dart' as p;
+import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 import 'package:tflite_native/tflite.dart' as tfl;
 
-final dataDir = p.join(Directory.current.path, 'testdata');
+final dataDir = path.join(Directory.current.path, 'testdata');
 final dataFile = '$dataDir/permute_uint8.tflite';
 final missingFile = '$dataDir/missing.tflite';
 final badFile = '$dataDir/bad_model.tflite';
