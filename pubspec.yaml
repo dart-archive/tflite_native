@@ -10,3 +10,8 @@ dependencies:
   quiver: ^2.0.3
 dev_dependencies:
   test: ^1.6.4
+
+flutter:
+  plugin:
+    androidPackage:
+    pluginClass:

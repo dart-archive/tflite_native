@@ -45,8 +45,7 @@ DynamicLibrary tflitelib = () {
     objectFile =
         File.fromUri(Platform.script).parent.path + '/' + _getObjectFilename();
   } else if (Platform.isAndroid) {
-    // piggy pack on top of https://pub.dev/packages/tflite 
-    objectFile = "libtensorflowlite_jni.so";
+    objectFile = "libtensorflowlite_c.so";
   } else {
     final rootLibrary = 'package:tflite_native/tflite.dart';
     final blobs = cli
