@@ -14,6 +14,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      showPerformanceOverlay: true,
       title: 'Image Picker Demo',
       home: MyHomePage(title: 'Image Picker Example'),
     );

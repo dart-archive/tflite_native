@@ -3,6 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:ffi';
+import 'dart:typed_data';
 import 'package:quiver/check.dart';
 
 import 'bindings/interpreter.dart';
@@ -37,6 +38,14 @@ class Interpreter {
     return interpreter;
   }
 
+  /// Creates interpreter from a model file or throws if unsuccessful.
+  factory Interpreter.fromByteData(ByteData byteData, {InterpreterOptions options}) {
+    final model = Model.fromByteData(byteData); // size 2827952 / 194696096
+    final interpreter = Interpreter(model, options: options);
+    // model.delete(); // should be delete in `interpreter delete
+    return interpreter;
+  }
+
   /// Destroys the model instance.
   void delete() {
     checkState(!_deleted, message: 'Interpreter already deleted.');
@@ -47,7 +56,8 @@ class Interpreter {
   /// Updates allocations for all tensors.
   void allocateTensors() {
     checkState(!_allocated, message: 'Interpreter already allocated.');
-    checkState(TFL_InterpreterAllocateTensors(_interpreter) == TFL_Status.ok);
+    final status = TFL_InterpreterAllocateTensors(_interpreter);
+    checkState(status == TFL_Status.ok);
     _allocated = true;
   }
 
@@ -69,6 +79,19 @@ class Interpreter {
       (i) => Tensor(TFL_InterpreterGetOutputTensor(_interpreter, i)),
       growable: false);
 
-  // Unimplemented:
-  // TFL_InterpreterResizeInputTensor
+
+  /// Resize input tensor for the given tensor index. `allocateTensors` must be called again afterward.
+  void resizeInputTensor(int tensorIndex, List<int> shape) {
+    final dimensionSize = shape.length;
+    final Pointer<Int32> dimensions = Pointer<Int32>.allocate(count: dimensionSize);
+    shape
+        .asMap()
+        .forEach((i, unit) {
+          dimensions.elementAt(i).store(unit);
+        });
+    final status = TFL_InterpreterResizeInputTensor(_interpreter, tensorIndex, dimensions, dimensionSize);
+    dimensions.free();
+    checkState(status == TFL_Status.ok);
+    _allocated = false;
+  }
 }

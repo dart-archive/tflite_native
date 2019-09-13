@@ -43,7 +43,8 @@ class Tensor {
   ///
   /// The size must match the size of the tensor.
   set data(List<int> bytes) {
-    checkArgument(TFL_TensorByteSize(_tensor) == bytes.length);
+    final tL = TFL_TensorByteSize(_tensor);
+    checkArgument(tL == bytes.length);
     final data = cast<Uint8>(TFL_TensorData(_tensor));
     checkState(isNotNull(data), message: 'Tensor data is null.');
     bytes.asMap().forEach((i, byte) => data.elementAt(i).store(byte));

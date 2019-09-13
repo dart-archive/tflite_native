@@ -3,9 +3,11 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:ffi';
+import 'dart:typed_data';
 import 'package:quiver/check.dart';
 
 import 'bindings/utf8.dart';
+import 'bindings/buffer.dart';
 import 'bindings/model.dart';
 import 'bindings/types.dart';
 import 'ffi/helper.dart';
@@ -28,6 +30,15 @@ class Model {
     return Model._(model);
   }
 
+  /// Loads model from a file or throws if unsuccessful.
+  factory Model.fromByteData(ByteData buffer) {
+    final cBuffer = Buffer.fromByteData(buffer);
+    final model = TFL_NewModel(cBuffer, buffer.buffer.asUint8List().length);
+    cBuffer.free();
+    checkArgument(isNotNull(model), message: 'Unable to create model.');
+    return Model._(model);
+  }
+
   /// Destroys the model instance.
   void delete() {
     checkState(!_deleted, message: 'Model already deleted.');
@@ -35,6 +46,4 @@ class Model {
     _deleted = true;
   }
 
-  // Unimplemented:
-  // Model.fromBuffer => TFL_NewModel
 }
