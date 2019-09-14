@@ -75,7 +75,7 @@ class _PreviewImageState extends State<PreviewImage> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<int>>(
+    return FutureBuilder<Uint8List>(
         future: widget._imageFile?.then((File inputImage) async {
       final bData = await rootBundle
           .load('assets/thumbnails/style${widget._styleIndex}.jpg');
@@ -90,7 +90,7 @@ class _PreviewImageState extends State<PreviewImage> {
       } catch (e) {
         print(e);
       }
-    }), builder: (BuildContext context, AsyncSnapshot<List<int>> snapshot) {
+    }), builder: (BuildContext context, AsyncSnapshot<Uint8List> snapshot) {
       if (snapshot.connectionState == ConnectionState.done &&
           snapshot.data != null) {
         return Image.memory(snapshot.data);
@@ -118,7 +118,7 @@ class TransferStyleParams {
       this.bData, this.stylePredict, this.styleTransfer, this.inputImage);
 }
 
-List<int> transferStyleSync(TransferStyleParams params) {
+Future<Uint8List> transferStyleSync(TransferStyleParams params) async {
   final bData = params.bData;
   final _stylePredict = tfl.Interpreter.fromSerialized(params.stylePredict) ;
   final _styleTransfer =  tfl.Interpreter.fromSerialized(params.styleTransfer);
@@ -129,11 +129,13 @@ List<int> transferStyleSync(TransferStyleParams params) {
   final singleData = _stylePredict.getInputTensors().single;
   singleData.data = imageByte; // slow
   _stylePredict.invoke();
-  final stylePredictBottle = _stylePredict.getOutputTensors().single; //slow
+  final stylePredictBottle = _stylePredict.getOutputTensors().single;
+  final stylePredictBottleData = stylePredictBottle.data;
 
-  img.Image contentImg = img.decodeImage(inputImage.readAsBytesSync()); // slow
+  final inputImageByte = await inputImage.readAsBytes();
+  img.Image contentImg = img.decodeImage(inputImageByte); // slow
   contentImg = img.copyResizeCropSquare(contentImg, 200);
-  _styleTransfer.resizeInputTensor(0, [1, 200, 200, 3]); //slow
+  _styleTransfer.resizeInputTensor(0, [1, 200, 200, 3]);
   _styleTransfer.allocateTensors();
 
   final styleTransferInputTensors = _styleTransfer.getInputTensors();
@@ -143,7 +145,8 @@ List<int> transferStyleSync(TransferStyleParams params) {
   final contentByte = contentImg.getBytes(format: img.Format.rgb);
   Float32List floatData = Float32List(contentByte.length)
     ..setAll(0, contentByte.map((i) => i / 255));
-  styleTransferInputTensors[0].data = Uint8List.view(floatData.buffer); //slow
+  final newData = Uint8List.view(floatData.buffer); //slow
+  styleTransferInputTensors[0].data = newData;
 
   _styleTransfer.invoke(); // slow
 
