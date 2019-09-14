@@ -28,11 +28,11 @@ class Tensor {
   TFL_Type get type => TFL_TensorType(_tensor);
 
   /// Dimensions of the tensor.
-  List<int> get shape => List.generate(
+  Uint8List get shape => List.generate(
       TFL_TensorNumDims(_tensor), (i) => TFL_TensorDim(_tensor, i));
 
   /// Underlying data buffer as bytes.
-  List<int> get data {
+  Uint8List get data {
     final data = cast<Uint8>(TFL_TensorData(_tensor));
     checkState(isNotNull(data), message: 'Tensor data is null.');
     return UnmodifiableUint8ListView(
@@ -42,16 +42,18 @@ class Tensor {
   /// Updates the underlying data buffer with new bytes.
   ///
   /// The size must match the size of the tensor.
-  set data(List<int> bytes) {
-    checkArgument(TFL_TensorByteSize(_tensor) == bytes.length);
+  set data(Uint8List bytes) {
+    final tensorByteSize = TFL_TensorByteSize(_tensor);
+    checkArgument(tensorByteSize == bytes.length);
     final data = cast<Uint8>(TFL_TensorData(_tensor));
     checkState(isNotNull(data), message: 'Tensor data is null.');
-    bytes.asMap().forEach((i, byte) => data.elementAt(i).store(byte));
+    final Uint8List externalTypedData = data.asExternalTypedData(count: tensorByteSize);
+    externalTypedData.setRange(0, tensorByteSize, bytes);
   }
 
   /// Copies the input bytes to the underlying data buffer.
   // TODO(shanehop): Prevent access if unallocated.
-  void copyFrom(List<int> bytes) {
+  void copyFrom(Uint8List bytes) {
     final ptr = Pointer<Uint8>.allocate(count: bytes.length);
     bytes.asMap().forEach((i, byte) => ptr.elementAt(i).store(byte));
     checkState(TFL_TensorCopyFromBuffer(_tensor, ptr.cast(), bytes.length) ==
@@ -61,7 +63,7 @@ class Tensor {
 
   /// Returns a copy of the underlying data buffer.
   // TODO(shanehop): Prevent access if unallocated.
-  List<int> copyTo() {
+  Uint8List copyTo() {
     int size = TFL_TensorByteSize(_tensor);
     final ptr = Pointer<Uint8>.allocate(count: size);
     checkState(
