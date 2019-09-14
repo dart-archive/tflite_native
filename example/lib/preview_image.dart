@@ -3,6 +3,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:image/image.dart' as img;
@@ -78,7 +79,17 @@ class _PreviewImageState extends State<PreviewImage> {
         future: widget._imageFile?.then((File inputImage) async {
       final bData = await rootBundle
           .load('assets/thumbnails/style${widget._styleIndex}.jpg');
-        return transferStyleSync(bData, _stylePredict, _styleTransfer, inputImage);
+      try {
+        return await compute(
+            transferStyleSync,
+            TransferStyleParams(
+                bData,
+                _stylePredict.toSerialized(),
+                _styleTransfer.toSerialized(),
+                inputImage));
+      } catch (e) {
+        print(e);
+      }
     }), builder: (BuildContext context, AsyncSnapshot<List<int>> snapshot) {
       if (snapshot.connectionState == ConnectionState.done &&
           snapshot.data != null) {
@@ -98,52 +109,65 @@ class _PreviewImageState extends State<PreviewImage> {
   }
 }
 
-List<int> transferStyleSync(ByteData bData, tfl.Interpreter _stylePredict, tfl.Interpreter _styleTransfer, File inputImage) {
-        img.Image image = img.decodeImage(bData.buffer.asUint8List());
-        final imageByte = image.getBytes(format: img.Format.rgb);
-        final singleData = _stylePredict.getInputTensors().single;
-        singleData.data = imageByte; // slow
-        _stylePredict.invoke();
-        final stylePredictBottle = _stylePredict.getOutputTensors().single; //slow
+class TransferStyleParams {
+  final ByteData bData;
+  final tfl.InterpreterSerializable stylePredict;
+  final tfl.InterpreterSerializable styleTransfer;
+  final File inputImage;
+  TransferStyleParams(
+      this.bData, this.stylePredict, this.styleTransfer, this.inputImage);
+}
 
-        img.Image contentImg = img.decodeImage(inputImage.readAsBytesSync()); // slow
-        contentImg = img.copyResizeCropSquare(contentImg, 300);
-        _styleTransfer.resizeInputTensor(0, [1, 300, 300, 3]); //slow
-        _styleTransfer.allocateTensors();
+List<int> transferStyleSync(TransferStyleParams params) {
+  final bData = params.bData;
+  final _stylePredict = tfl.Interpreter.fromSerialized(params.stylePredict) ;
+  final _styleTransfer =  tfl.Interpreter.fromSerialized(params.styleTransfer);
+  final inputImage = params.inputImage;
 
-        final styleTransferInputTensors = _styleTransfer.getInputTensors();
-        // @todo use copyFrom/To
-        styleTransferInputTensors[1].data = stylePredictBottle.data;
+  img.Image image = img.decodeImage(bData.buffer.asUint8List());
+  final imageByte = image.getBytes(format: img.Format.rgb);
+  final singleData = _stylePredict.getInputTensors().single;
+  singleData.data = imageByte; // slow
+  _stylePredict.invoke();
+  final stylePredictBottle = _stylePredict.getOutputTensors().single; //slow
 
-        final contentByte = contentImg.getBytes(format: img.Format.rgb);
-        Float32List floatData = Float32List(contentByte.length)
-          ..setAll(0, contentByte.map((i) => i / 255));
-        styleTransferInputTensors[0].data = Uint8List.view(floatData.buffer); //slow
+  img.Image contentImg = img.decodeImage(inputImage.readAsBytesSync()); // slow
+  contentImg = img.copyResizeCropSquare(contentImg, 200);
+  _styleTransfer.resizeInputTensor(0, [1, 200, 200, 3]); //slow
+  _styleTransfer.allocateTensors();
 
-        _styleTransfer.invoke(); // slow
+  final styleTransferInputTensors = _styleTransfer.getInputTensors();
+  // @todo use copyFrom/To
+  styleTransferInputTensors[1].data = stylePredictBottle.data;
 
-        final output = _styleTransfer.getOutputTensors().single; // slow
+  final contentByte = contentImg.getBytes(format: img.Format.rgb);
+  Float32List floatData = Float32List(contentByte.length)
+    ..setAll(0, contentByte.map((i) => i / 255));
+  styleTransferInputTensors[0].data = Uint8List.view(floatData.buffer); //slow
 
-        // Get bytes.
-        final bytes = Uint8List.fromList(output.data);
+  _styleTransfer.invoke(); // slow
 
-        // Get scores (as floats)
-        final probabilities = Float32List.view(bytes.buffer);
+  final output = _styleTransfer.getOutputTensors().single; // slow
 
-        final resultRGB = Uint8List(probabilities.length)
-          ..setAll(0, probabilities.map((i) => (i * 255).toInt()));
+  // Get bytes.
+  final bytes = Uint8List.fromList(output.data);
 
-        final blendFactor = 0.8;
-        var pixels = contentImg.getBytes();
-        for (int i = 0, j = 0, len = pixels.length; i < len; i += 4, j += 3) {
-          for (int rgbIndex = 0; rgbIndex < 3; rgbIndex++) {
-              final originalPix = pixels[i + rgbIndex];
-              final artistPix = resultRGB[j + rgbIndex];
-              final newPix =
-                  artistPix * blendFactor + originalPix * (1 - blendFactor);
-              pixels[i + rgbIndex] = newPix.toInt();
-          }
-        }
-        final processedImageBuff = img.encodeJpg(contentImg);
-        return processedImageBuff;
+  // Get scores (as floats)
+  final probabilities = Float32List.view(bytes.buffer);
+
+  final resultRGB = Uint8List(probabilities.length)
+    ..setAll(0, probabilities.map((i) => (i * 255).toInt()));
+
+  final blendFactor = 0.8;
+  var pixels = contentImg.getBytes();
+  for (int i = 0, j = 0, len = pixels.length; i < len; i += 4, j += 3) {
+    for (int rgbIndex = 0; rgbIndex < 3; rgbIndex++) {
+      final originalPix = pixels[i + rgbIndex];
+      final artistPix = resultRGB[j + rgbIndex];
+      final newPix = artistPix * blendFactor + originalPix * (1 - blendFactor);
+      pixels[i + rgbIndex] = newPix.toInt();
+    }
+  }
+  final processedImageBuff = img.encodeJpg(contentImg);
+  return processedImageBuff;
 }

@@ -13,6 +13,13 @@ import 'ffi/helper.dart';
 import 'model.dart';
 import 'tensor.dart';
 
+class InterpreterSerializable {
+  final interpreterAddress;
+  final deleted;
+  final allocated;
+
+  InterpreterSerializable(this.interpreterAddress, this.deleted, this.allocated);
+}
 /// TensorFlowLite interpreter for running inference on a model.
 class Interpreter {
   final Pointer<TFL_Interpreter> _interpreter;
@@ -20,6 +27,16 @@ class Interpreter {
   bool _allocated = false;
 
   Interpreter._(this._interpreter);
+  Interpreter._full(this._interpreter, this._deleted, this._allocated);
+
+  InterpreterSerializable toSerialized() => InterpreterSerializable(_interpreter.address, _deleted, _allocated);
+
+  get unsafeAddress => _interpreter.address;
+  get allocated => _allocated;
+  factory Interpreter.fromSerialized(InterpreterSerializable serialized) {
+    var interpreter = Pointer<TFL_Interpreter>.fromAddress(serialized.interpreterAddress);
+    return Interpreter._full(interpreter, serialized.deleted, serialized.allocated);
+  }
 
   /// Creates interpreter from model or throws if unsuccessful.
   factory Interpreter(Model model, {InterpreterOptions options}) {
