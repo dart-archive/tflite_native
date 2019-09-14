@@ -4,14 +4,23 @@ PODS:
     - Flutter
   - path_provider (0.0.1):
     - Flutter
+  - TensorFlowLiteC (1.14.0)
+  - TensorFlowLiteObjC (1.14.0):
+    - TensorFlowLiteC (= 1.14.0)
   - tflite_native (0.0.1):
     - Flutter
+    - TensorFlowLiteObjC (= 1.14.0)
 
 DEPENDENCIES:
   - Flutter (from `.symlinks/flutter/ios`)
   - image_picker (from `.symlinks/plugins/image_picker/ios`)
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
   - tflite_native (from `.symlinks/plugins/tflite_native/ios`)
+
+SPEC REPOS:
+  https://github.com/cocoapods/specs.git:
+    - TensorFlowLiteC
+    - TensorFlowLiteObjC
 
 EXTERNAL SOURCES:
   Flutter:
@@ -27,8 +36,10 @@ SPEC CHECKSUMS:
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
   image_picker: 16e5fec1fbc87fd3b297c53e4048521eaf17cd06
   path_provider: f96fff6166a8867510d2c25fdcc346327cc4b259
-  tflite_native: 86958e10fb15ec63d51e44e27b35bd427240c522
+  TensorFlowLiteC: a6702011fb661928634e59565b5fe262f69692d0
+  TensorFlowLiteObjC: ece71b1e78f3df5952996c1606934b1d5538c875
+  tflite_native: 38e7f4ed55ff13b717a48cde0f024f8597f7d3fe
 
-PODFILE CHECKSUM: 64b2109b760ac9073c864e2a8278e6464efaa219
+PODFILE CHECKSUM: f49f6685c37f93de1e6ecd4a1c9b7d66e5817e52
 
 COCOAPODS: 1.7.5

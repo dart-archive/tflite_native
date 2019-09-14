@@ -15,7 +15,10 @@ A new flutter plugin project.
   s.source_files = 'Classes/**/*'
   s.public_header_files = 'Classes/**/*.h'
   s.dependency 'Flutter'
+  # @todo ideally, we should use 'TensorFlowLiteC' only
+  # but it does not have `*.modulemap`
+  s.dependency 'TensorFlowLiteObjC', '1.14.0'
 
-  s.ios.deployment_target = '8.0'
+  s.ios.deployment_target = '9.0'
 end
 
