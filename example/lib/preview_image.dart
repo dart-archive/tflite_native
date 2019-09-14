@@ -75,17 +75,38 @@ class _PreviewImageState extends State<PreviewImage> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<int>>(
-        future: widget._imageFile?.then((inputImage) async {
+        future: widget._imageFile?.then((File inputImage) async {
       final bData = await rootBundle
           .load('assets/thumbnails/style${widget._styleIndex}.jpg');
-      img.Image image = img.decodeImage(bData.buffer.asUint8List());
+        return transferStyleSync(bData, _stylePredict, _styleTransfer, inputImage);
+    }), builder: (BuildContext context, AsyncSnapshot<List<int>> snapshot) {
+      if (snapshot.connectionState == ConnectionState.done &&
+          snapshot.data != null) {
+        return Image.memory(snapshot.data);
+      } else if (snapshot.error != null) {
+        return const Text(
+          'Error picking image.',
+          textAlign: TextAlign.center,
+        );
+      } else {
+        return const Text(
+          'You have not yet picked an image.',
+          textAlign: TextAlign.center,
+        );
+      }
+    });
+  }
+}
+
+List<int> transferStyleSync(ByteData bData, tfl.Interpreter _stylePredict, tfl.Interpreter _styleTransfer, File inputImage) {
+        img.Image image = img.decodeImage(bData.buffer.asUint8List());
         final imageByte = image.getBytes(format: img.Format.rgb);
         final singleData = _stylePredict.getInputTensors().single;
         singleData.data = imageByte; // slow
         _stylePredict.invoke();
         final stylePredictBottle = _stylePredict.getOutputTensors().single; //slow
 
-        img.Image contentImg = img.decodeImage(await inputImage.readAsBytes()); // slow
+        img.Image contentImg = img.decodeImage(inputImage.readAsBytesSync()); // slow
         contentImg = img.copyResizeCropSquare(contentImg, 300);
         _styleTransfer.resizeInputTensor(0, [1, 300, 300, 3]); //slow
         _styleTransfer.allocateTensors();
@@ -125,44 +146,4 @@ class _PreviewImageState extends State<PreviewImage> {
         }
         final processedImageBuff = img.encodeJpg(contentImg);
         return processedImageBuff;
-    }), builder: (BuildContext context, AsyncSnapshot<List<int>> snapshot) {
-      if (snapshot.connectionState == ConnectionState.done &&
-          snapshot.data != null) {
-        return Image.memory(snapshot.data);
-      } else if (snapshot.error != null) {
-        return const Text(
-          'Error picking image.',
-          textAlign: TextAlign.center,
-        );
-      } else {
-        return const Text(
-          'You have not yet picked an image.',
-          textAlign: TextAlign.center,
-        );
-      }
-    });
-  }
 }
-
-/// Transforms tokens to data bytes that can be used as interpreter input.
-// Uint8List _transformInput(img.Image image) {
-
-//   final imageByte = image.getBytes(format: img.Format.rgba);
-//   final imagePixelSize = image.width * image.height;
-//   var result = ByteData(imagePixelSize);
-//   for (var i = 0; i<imagePixelSize; i++ ){
-
-//     result.setFloat32(i, value);
-//   }
-
-//   // Replace out of vocabulary tokens.
-//   final sanitizedTokens = tokens
-//       .map((token) => _word2idx.containsKey(token) ? token : '<unknown>');
-
-//   // Get indexes (as floats).
-//   final Float32List indexes = Float32List(lookback)
-//     ..setAll(0, sanitizedTokens.map((token) => _word2idx[token].toDouble()));
-
-//   // Get bytes
-//   return Uint8List.view(indexes.buffer);
-// }
