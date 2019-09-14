@@ -59,7 +59,7 @@ class _MyHomePageState extends State<MyHomePage> {
           children: <Widget>[
             Wrap(
               children: <Widget>[
-                for (var i = 0; i <= 5; i++)
+                for (var i = 0; i <= 25; i++)
                   ButtonTheme(
                     minWidth: 0,
                     child: MaterialButton(

@@ -79,17 +79,15 @@ class _PreviewImageState extends State<PreviewImage> {
       final bData = await rootBundle
           .load('assets/thumbnails/style${widget._styleIndex}.jpg');
       img.Image image = img.decodeImage(bData.buffer.asUint8List());
-
-      try {
         final imageByte = image.getBytes(format: img.Format.rgb);
         final singleData = _stylePredict.getInputTensors().single;
-        singleData.data = imageByte;
+        singleData.data = imageByte; // slow
         _stylePredict.invoke();
-        final stylePredictBottle = _stylePredict.getOutputTensors().single;
+        final stylePredictBottle = _stylePredict.getOutputTensors().single; //slow
 
-        img.Image contentImg = img.decodeImage(await inputImage.readAsBytes());
-        contentImg = img.copyResizeCropSquare(contentImg, 500);
-        _styleTransfer.resizeInputTensor(0, [1, 500, 500, 3]);
+        img.Image contentImg = img.decodeImage(await inputImage.readAsBytes()); // slow
+        contentImg = img.copyResizeCropSquare(contentImg, 300);
+        _styleTransfer.resizeInputTensor(0, [1, 300, 300, 3]); //slow
         _styleTransfer.allocateTensors();
 
         final styleTransferInputTensors = _styleTransfer.getInputTensors();
@@ -99,13 +97,11 @@ class _PreviewImageState extends State<PreviewImage> {
         final contentByte = contentImg.getBytes(format: img.Format.rgb);
         Float32List floatData = Float32List(contentByte.length)
           ..setAll(0, contentByte.map((i) => i / 255));
-        styleTransferInputTensors[0].data = Uint8List.view(floatData.buffer);
+        styleTransferInputTensors[0].data = Uint8List.view(floatData.buffer); //slow
 
-        _styleTransfer.invoke();
+        _styleTransfer.invoke(); // slow
 
-        final output = _styleTransfer.getOutputTensors().single;
-
-        print(output);
+        final output = _styleTransfer.getOutputTensors().single; // slow
 
         // Get bytes.
         final bytes = Uint8List.fromList(output.data);
@@ -120,23 +116,15 @@ class _PreviewImageState extends State<PreviewImage> {
         var pixels = contentImg.getBytes();
         for (int i = 0, j = 0, len = pixels.length; i < len; i += 4, j += 3) {
           for (int rgbIndex = 0; rgbIndex < 3; rgbIndex++) {
-            try {
               final originalPix = pixels[i + rgbIndex];
               final artistPix = resultRGB[j + rgbIndex];
               final newPix =
                   artistPix * blendFactor + originalPix * (1 - blendFactor);
               pixels[i + rgbIndex] = newPix.toInt();
-            } catch (e) {
-              print(e);
-            }
           }
-          // pixels[i + 3] = // alpha
         }
         final processedImageBuff = img.encodeJpg(contentImg);
         return processedImageBuff;
-      } catch (e) {
-        print(e);
-      }
     }), builder: (BuildContext context, AsyncSnapshot<List<int>> snapshot) {
       if (snapshot.connectionState == ConnectionState.done &&
           snapshot.data != null) {
