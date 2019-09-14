@@ -3,6 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:ffi';
+import 'dart:typed_data';
 import 'package:quiver/check.dart';
 
 import 'bindings/interpreter.dart';
@@ -69,6 +70,15 @@ class Interpreter {
       (i) => Tensor(TFL_InterpreterGetOutputTensor(_interpreter, i)),
       growable: false);
 
-  // Unimplemented:
-  // TFL_InterpreterResizeInputTensor
+  /// Resize input tensor for the given tensor index. `allocateTensors` must be called again afterward.
+  void resizeInputTensor(int tensorIndex, List<int> shape) {
+    final dimensionSize = shape.length;
+    final Pointer<Int32> dimensions = Pointer<Int32>.allocate(count: dimensionSize);
+    final Int32List externalTypedData = dimensions.asExternalTypedData();
+    externalTypedData.setRange(0, dimensionSize, shape);
+    final status = TFL_InterpreterResizeInputTensor(_interpreter, tensorIndex, dimensions, dimensionSize);
+    dimensions.free();
+    checkState(status == TFL_Status.ok);
+    _allocated = false;
+  }
 }
