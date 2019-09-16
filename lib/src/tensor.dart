@@ -28,7 +28,7 @@ class Tensor {
   TFL_Type get type => TFL_TensorType(_tensor);
 
   /// Dimensions of the tensor.
-  Uint8List get shape => List.generate(
+  List<int> get shape => List.generate(
       TFL_TensorNumDims(_tensor), (i) => TFL_TensorDim(_tensor, i));
 
   /// Underlying data buffer as bytes.
