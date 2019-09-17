@@ -74,7 +74,7 @@ class Interpreter {
   void resizeInputTensor(int tensorIndex, List<int> shape) {
     final dimensionSize = shape.length;
     final Pointer<Int32> dimensions = Pointer<Int32>.allocate(count: dimensionSize);
-    final Int32List externalTypedData = dimensions.asExternalTypedData();
+    final Int32List externalTypedData = dimensions.asExternalTypedData(count: dimensionSize);
     externalTypedData.setRange(0, dimensionSize, shape);
     final status = TFL_InterpreterResizeInputTensor(_interpreter, tensorIndex, dimensions, dimensionSize);
     dimensions.free();
