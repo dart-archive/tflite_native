@@ -3,6 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:ffi';
+import 'dart:typed_data';
 import 'package:quiver/check.dart';
 
 import 'bindings/interpreter.dart';
@@ -73,8 +74,8 @@ class Interpreter {
   /// Resize input tensor for the given tensor index. `allocateTensors` must be called again afterward.
   void resizeInputTensor(int tensorIndex, List<int> shape) {
     final dimensionSize = shape.length;
-    final Pointer<Int32> dimensions = Pointer<Int32>.allocate(count: dimensionSize);
-    final Int32List externalTypedData = dimensions.asExternalTypedData(count: dimensionSize);
+    final dimensions = Pointer<Int32>.allocate(count: dimensionSize);
+    final externalTypedData = dimensions.asExternalTypedData(count: dimensionSize) as Int32List;
     externalTypedData.setRange(0, dimensionSize, shape);
     final status = TfLiteInterpreterResizeInputTensor(_interpreter, tensorIndex, dimensions, dimensionSize);
     dimensions.free();
