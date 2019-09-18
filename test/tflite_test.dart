@@ -119,7 +119,7 @@ void main() {
       expect(interpreter.getOutputTensors(), hasLength(1));
     });
 
-    test('resize unput tensor', () {
+    test('resize input tensor', () {
       interpreter.resizeInputTensor(0, [2, 3, 5]);
       expect(interpreter.getInputTensors().single.shape, [2, 3, 5]);
     });
