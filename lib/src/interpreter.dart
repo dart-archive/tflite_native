@@ -3,13 +3,12 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:ffi';
-import 'dart:typed_data';
 import 'package:quiver/check.dart';
 
 import 'bindings/interpreter.dart';
 import 'bindings/types.dart';
-import 'interpreter_options.dart';
 import 'ffi/helper.dart';
+import 'interpreter_options.dart';
 import 'model.dart';
 import 'tensor.dart';
 
@@ -48,7 +47,8 @@ class Interpreter {
   /// Updates allocations for all tensors.
   void allocateTensors() {
     checkState(!_allocated, message: 'Interpreter already allocated.');
-    checkState(TfLiteInterpreterAllocateTensors(_interpreter) == TfLiteStatus.ok);
+    checkState(
+        TfLiteInterpreterAllocateTensors(_interpreter) == TfLiteStatus.ok);
     _allocated = true;
   }
 

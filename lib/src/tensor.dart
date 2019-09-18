@@ -4,6 +4,7 @@
 
 import 'dart:ffi';
 import 'dart:typed_data';
+
 import 'package:quiver/check.dart';
 
 import 'bindings/tensor.dart';
@@ -32,28 +33,33 @@ class Tensor {
       TfLiteTensorNumDims(_tensor), (i) => TfLiteTensorDim(_tensor, i));
 
   /// Underlying data buffer as bytes.
-  List<int> get data {
+  Uint8List get data {
     final data = cast<Uint8>(TfLiteTensorData(_tensor));
     checkState(isNotNull(data), message: 'Tensor data is null.');
-    return UnmodifiableUint8ListView(
-        data.asExternalTypedData(count: TfLiteTensorByteSize(_tensor)));
+    return UnmodifiableUint8ListView(data.asExternalTypedData(
+        count: TfLiteTensorByteSize(_tensor)) as Uint8List);
   }
 
   /// Updates the underlying data buffer with new bytes.
   ///
   /// The size must match the size of the tensor.
-  set data(List<int> bytes) {
-    checkArgument(TfLiteTensorByteSize(_tensor) == bytes.length);
+  set data(Uint8List bytes) {
+    final tensorByteSize = TfLiteTensorByteSize(_tensor);
+    checkArgument(tensorByteSize == bytes.length);
     final data = cast<Uint8>(TfLiteTensorData(_tensor));
     checkState(isNotNull(data), message: 'Tensor data is null.');
-    bytes.asMap().forEach((i, byte) => data.elementAt(i).store(byte));
+    final externalTypedData =
+        data.asExternalTypedData(count: tensorByteSize) as Uint8List;
+    externalTypedData.setRange(0, tensorByteSize, bytes);
   }
 
   /// Copies the input bytes to the underlying data buffer.
   // TODO(shanehop): Prevent access if unallocated.
-  void copyFrom(List<int> bytes) {
-    final ptr = Pointer<Uint8>.allocate(count: bytes.length);
-    bytes.asMap().forEach((i, byte) => ptr.elementAt(i).store(byte));
+  void copyFrom(Uint8List bytes) {
+    var size = bytes.length;
+    final ptr = Pointer<Uint8>.allocate(count: size);
+    final externalTypedData = ptr.asExternalTypedData(count: size) as Uint8List;
+    externalTypedData.setRange(0, bytes.length, bytes);
     checkState(TfLiteTensorCopyFromBuffer(_tensor, ptr.cast(), bytes.length) ==
         TfLiteStatus.ok);
     ptr.free();
@@ -61,13 +67,14 @@ class Tensor {
 
   /// Returns a copy of the underlying data buffer.
   // TODO(shanehop): Prevent access if unallocated.
-  List<int> copyTo() {
-    int size = TfLiteTensorByteSize(_tensor);
+  Uint8List copyTo() {
+    var size = TfLiteTensorByteSize(_tensor);
     final ptr = Pointer<Uint8>.allocate(count: size);
+    final externalTypedData = ptr.asExternalTypedData(count: size) as Uint8List;
     checkState(
-        TfLiteTensorCopyToBuffer(_tensor, ptr.cast(), size) == TfLiteStatus.ok);
-    final bytes = List.generate(size, (i) => ptr.elementAt(i).load<int>(),
-        growable: false);
+        TfLiteTensorCopyToBuffer(_tensor, ptr.cast(), 4) == TfLiteStatus.ok);
+    // clone the data, because once `ptr.free()`, `externalTypedData` will be volatile
+    final bytes = externalTypedData.sublist(0);
     ptr.free();
     return bytes;
   }
