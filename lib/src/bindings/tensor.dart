@@ -4,7 +4,8 @@
 
 import 'dart:ffi';
 
-import 'utf8.dart';
+import 'package:ffi/ffi.dart';
+
 import 'dlib.dart';
 import 'types.dart';
 

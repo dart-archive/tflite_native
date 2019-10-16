@@ -3,6 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:ffi';
+
 import 'package:quiver/check.dart';
 
 import 'bindings/interpreter.dart';
@@ -68,6 +69,7 @@ class Interpreter {
       TFL_InterpreterGetOutputTensorCount(_interpreter),
       (i) => Tensor(TFL_InterpreterGetOutputTensor(_interpreter, i)),
       growable: false);
+
 
   // Unimplemented:
   // TFL_InterpreterResizeInputTensor

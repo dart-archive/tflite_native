@@ -3,7 +3,9 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:ffi';
-import 'utf8.dart';
+
+import 'package:ffi/ffi.dart';
+
 import 'dlib.dart';
 
 /// Version information for the TensorFlowLite library.

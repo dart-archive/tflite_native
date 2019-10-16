@@ -1,3 +1,15 @@
+# 0.3.1-dev.2
+
+* Replaced uses of deprecated `asExternalTypedData` with `asTypedList`.
+
+# 0.3.0
+
+* Update to new tflite C API
+
+# 0.3.0
+
+* Update to new tflite C API
+
 # 0.2.3
 
 * Specify `>=2.5.0` in `pubspec.yaml`
