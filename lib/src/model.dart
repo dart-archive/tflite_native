@@ -3,9 +3,10 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:ffi';
+
+import 'package:ffi/ffi.dart';
 import 'package:quiver/check.dart';
 
-import 'bindings/utf8.dart';
 import 'bindings/model.dart';
 import 'bindings/types.dart';
 import 'ffi/helper.dart';
@@ -23,7 +24,7 @@ class Model {
   factory Model.fromFile(String path) {
     final cpath = Utf8.toUtf8(path);
     final model = TFL_NewModelFromFile(cpath);
-    cpath.free();
+    free(cpath);
     checkArgument(isNotNull(model), message: 'Unable to create model.');
     return Model._(model);
   }

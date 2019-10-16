@@ -4,11 +4,12 @@
 
 import 'dart:ffi';
 import 'dart:typed_data';
+
+import 'package:ffi/ffi.dart';
 import 'package:quiver/check.dart';
 
 import 'bindings/tensor.dart';
 import 'bindings/types.dart';
-import 'bindings/utf8.dart';
 import 'ffi/helper.dart';
 
 export 'bindings/types.dart' show TFL_Type;
@@ -36,39 +37,45 @@ class Tensor {
     final data = cast<Uint8>(TFL_TensorData(_tensor));
     checkState(isNotNull(data), message: 'Tensor data is null.');
     return UnmodifiableUint8ListView(
-        data.asExternalTypedData(count: TFL_TensorByteSize(_tensor)));
+        data.asTypedList(TFL_TensorByteSize(_tensor)));
   }
 
   /// Updates the underlying data buffer with new bytes.
   ///
   /// The size must match the size of the tensor.
   set data(List<int> bytes) {
+    final tensorByteSize = TFL_TensorByteSize(_tensor);
     checkArgument(TFL_TensorByteSize(_tensor) == bytes.length);
     final data = cast<Uint8>(TFL_TensorData(_tensor));
     checkState(isNotNull(data), message: 'Tensor data is null.');
-    bytes.asMap().forEach((i, byte) => data.elementAt(i).store(byte));
+    final externalTypedData = data.asTypedList(tensorByteSize);
+    externalTypedData.setRange(0, tensorByteSize, bytes);
   }
 
   /// Copies the input bytes to the underlying data buffer.
   // TODO(shanehop): Prevent access if unallocated.
-  void copyFrom(List<int> bytes) {
-    final ptr = Pointer<Uint8>.allocate(count: bytes.length);
-    bytes.asMap().forEach((i, byte) => ptr.elementAt(i).store(byte));
+  void copyFrom(Uint8List bytes) {
+    final size = bytes.length;
+    final ptr = allocate<Uint8>(count: size);
+    final externalTypedData = ptr.asTypedList(size);
+    externalTypedData.setRange(0, bytes.length, bytes);
     checkState(TFL_TensorCopyFromBuffer(_tensor, ptr.cast(), bytes.length) ==
         TFL_Status.ok);
-    ptr.free();
+    free(ptr);
   }
 
   /// Returns a copy of the underlying data buffer.
   // TODO(shanehop): Prevent access if unallocated.
-  List<int> copyTo() {
+  Uint8List copyTo() {
     int size = TFL_TensorByteSize(_tensor);
-    final ptr = Pointer<Uint8>.allocate(count: size);
+    final ptr = allocate<Uint8>(count: size);
+    final externalTypedData = ptr.asTypedList(size);
     checkState(
         TFL_TensorCopyToBuffer(_tensor, ptr.cast(), size) == TFL_Status.ok);
-    final bytes = List.generate(size, (i) => ptr.elementAt(i).load<int>(),
-        growable: false);
-    ptr.free();
+    // Clone the data, because once `free(ptr)`, `externalTypedData` will be
+    // volatile
+    final bytes = externalTypedData.sublist(0);
+    free(ptr);
     return bytes;
   }
 
