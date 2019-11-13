@@ -57,14 +57,6 @@ class Interpreter {
     return interpreter;
   }
 
-  /// Creates interpreter from a model file or throws if unsuccessful.
-  factory Interpreter.fromByteData(ByteData byteData, {InterpreterOptions options}) {
-    final model = Model.fromByteData(byteData); // size 2827952 / 194696096
-    final interpreter = Interpreter(model, options: options);
-    // model.delete(); // should be delete in `interpreter delete
-    return interpreter;
-  }
-
   /// Destroys the model instance.
   void delete() {
     checkState(!_deleted, message: 'Interpreter already deleted.');

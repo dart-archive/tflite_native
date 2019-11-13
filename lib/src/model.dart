@@ -8,7 +8,6 @@ import 'dart:typed_data';
 import 'package:ffi/ffi.dart';
 import 'package:quiver/check.dart';
 
-import 'bindings/buffer.dart';
 import 'bindings/model.dart';
 import 'bindings/types.dart';
 import 'ffi/helper.dart';
@@ -27,15 +26,6 @@ class Model {
     final cpath = Utf8.toUtf8(path);
     final model = TfLiteModelCreateFromFile(cpath);
     free(cpath);
-    checkArgument(isNotNull(model), message: 'Unable to create model.');
-    return Model._(model);
-  }
-
-  /// Loads model from a file or throws if unsuccessful.
-  factory Model.fromByteData(ByteData buffer) {
-    final Pointer<Buffer> cBuffer = Buffer.fromByteData(buffer);
-    final model = TfLiteNewModel(cBuffer, buffer.buffer.asUint8List().length);
-    free(cBuffer);
     checkArgument(isNotNull(model), message: 'Unable to create model.');
     return Model._(model);
   }
