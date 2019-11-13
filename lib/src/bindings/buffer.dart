@@ -6,18 +6,17 @@ import 'dart:ffi';
 
 import 'dart:typed_data';
 
-/// Represents a (char*) in C memory.
-class Buffer extends Struct<Buffer> {
-  @Uint8()
-  int char;
+import 'package:ffi/ffi.dart';
 
+/// Represents a (char*) in C memory.
+class Buffer extends Struct {
   /// Allocates and stores the given Dart [String] as a [Pointer<Utf8>].
   static Pointer<Buffer> fromByteData(ByteData byteData) {
     final units = byteData.buffer.asUint8List();
-    final ptr = Pointer<Buffer>.allocate(count: units.length);
-    units
-        .asMap()
-        .forEach((i, unit) => ptr.elementAt(i).load<Buffer>().char = unit);
-    return ptr;
+    final result = allocate<Uint8>(count: units.length);
+    final nativeString = result.asTypedList(units.length);
+    nativeString.setAll(0, units);
+    nativeString[units.length] = 0;
+    return result.cast();
   }
 }

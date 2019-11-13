@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
@@ -171,6 +170,6 @@ Future<Uint8List> transferStyleSync(TransferStyleParams params) async {
       pixels[i + rgbIndex] = newPix.toInt();
     }
   }
-  final processedImageBuff = img.encodeJpg(contentImg);
+  final processedImageBuff = img.encodeJpg(contentImg) as Uint8List;
   return processedImageBuff;
 }

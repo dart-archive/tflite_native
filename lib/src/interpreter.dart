@@ -16,9 +16,9 @@ import 'model.dart';
 import 'tensor.dart';
 
 class InterpreterSerializable {
-  final interpreterAddress;
-  final deleted;
-  final allocated;
+  final int interpreterAddress;
+  final bool deleted;
+  final bool allocated;
 
   InterpreterSerializable(this.interpreterAddress, this.deleted, this.allocated);
 }
@@ -36,7 +36,7 @@ class Interpreter {
   get unsafeAddress => _interpreter.address;
   get allocated => _allocated;
   factory Interpreter.fromSerialized(InterpreterSerializable serialized) {
-    var interpreter = Pointer<TFL_Interpreter>.fromAddress(serialized.interpreterAddress);
+    var interpreter = Pointer<TfLiteInterpreter>.fromAddress(serialized.interpreterAddress);
     return Interpreter._full(interpreter, serialized.deleted, serialized.allocated);
   }
 

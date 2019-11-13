@@ -3,6 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:ffi';
+import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
 import 'package:quiver/check.dart';
@@ -31,9 +32,9 @@ class Model {
 
   /// Loads model from a file or throws if unsuccessful.
   factory Model.fromByteData(ByteData buffer) {
-    final cBuffer = Buffer.fromByteData(buffer);
-    final model = TFL_NewModel(cBuffer, buffer.buffer.asUint8List().length);
-    cBuffer.free();
+    final Pointer<Void> cBuffer = Buffer.fromByteData(buffer);
+    final model = TfLiteNewModel(cBuffer, buffer.buffer.asUint8List().length);
+    free(cBuffer);
     checkArgument(isNotNull(model), message: 'Unable to create model.');
     return Model._(model);
   }
