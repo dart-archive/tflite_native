@@ -2,7 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'dart:cli' as cli;
+import 'cli_stub.dart' as cli if (dart.library.io) 'dart:cli';
 import 'dart:ffi';
 import 'dart:io';
 import 'dart:isolate' show Isolate;
@@ -44,6 +44,10 @@ DynamicLibrary tflitelib = () {
     // file is a sibling.
     objectFile =
         File.fromUri(Platform.script).parent.path + '/' + _getObjectFilename();
+  } else if (Platform.isAndroid) {
+    objectFile = "libtensorflowlite_c.so";
+  } else if (Platform.isIOS) {
+    return DynamicLibrary.process();
   } else {
     final rootLibrary = 'package:tflite_native/tflite.dart';
     final blobs = cli
