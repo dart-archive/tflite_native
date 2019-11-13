@@ -97,6 +97,12 @@ void main() {
       expect(() => interpreter.invoke(), throwsA(isStateError));
     });
 
+    test('invoke throws if not allocated after resized', () {
+      interpreter.allocateTensors();
+      interpreter.resizeInputTensor(0, [1, 2, 4]);
+      expect(() => interpreter.invoke(), throwsA(isStateError));
+    });
+
     test('invoke succeeds if allocated', () {
       interpreter.allocateTensors();
       interpreter.invoke();
@@ -114,6 +120,11 @@ void main() {
       expect(interpreter.getOutputTensors(), hasLength(1));
     });
 
+    test('resize input tensor', () {
+      interpreter.resizeInputTensor(0, [2, 3, 5]);
+      expect(interpreter.getInputTensors().single.shape, [2, 3, 5]);
+    });
+
     group('tensors', () {
       List<tfl.Tensor> tensors;
       setUp(() => tensors = interpreter.getInputTensors());
@@ -123,7 +134,7 @@ void main() {
       });
 
       test('type', () {
-        expect(tensors[0].type, tfl.TFL_Type.uint8);
+        expect(tensors[0].type, tfl.TfLiteType.uint8);
       });
 
       test('shape', () {
@@ -141,7 +152,8 @@ void main() {
         });
 
         test('set throws if not allocated', () {
-          expect(() => tensors[0].data = Uint8List.fromList(const [0, 0, 0, 0]), throwsA(isStateError));
+          expect(() => tensors[0].data = Uint8List.fromList(const [0, 0, 0, 0]),
+              throwsA(isStateError));
         });
 
         test('set', () {
@@ -159,7 +171,8 @@ void main() {
 
         test('copyFrom throws if not allocated', () {
           expect(
-              () => tensors[0].copyFrom(Uint8List.fromList(const [0, 0, 0, 0])), throwsA(isStateError));
+              () => tensors[0].copyFrom(Uint8List.fromList(const [0, 0, 0, 0])),
+              throwsA(isStateError));
         }, skip: 'segmentation fault!');
         // TODO(shanehop): Prevent data access for unallocated tensors.
 

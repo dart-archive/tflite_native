@@ -5,12 +5,14 @@
 /// TensorFlow Lite for Dart
 library tflite;
 
+import 'package:ffi/ffi.dart';
+
 import 'src/bindings/bindings.dart';
-import 'src/bindings/utf8.dart';
-export 'src/model.dart';
+
 export 'src/interpreter.dart';
 export 'src/interpreter_options.dart';
+export 'src/model.dart';
 export 'src/tensor.dart';
 
 /// tflite version information.
-String get version => Utf8.fromUtf8(TFL_Version());
+String get version => Utf8.fromUtf8(TfLiteVersion());

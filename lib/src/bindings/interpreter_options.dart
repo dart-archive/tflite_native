@@ -4,35 +4,42 @@
 
 import 'dart:ffi';
 
-import 'utf8.dart';
+import 'package:ffi/ffi.dart';
+
 import 'dlib.dart';
 import 'types.dart';
 
 /// Returns a new interpreter options instances.
-Pointer<TFL_InterpreterOptions> Function() TFL_NewInterpreterOptions = tflitelib
-    .lookup<NativeFunction<_TFL_NewInterpreterOptions_native_t>>(
-        'TFL_NewInterpreterOptions')
-    .asFunction();
-typedef _TFL_NewInterpreterOptions_native_t = Pointer<TFL_InterpreterOptions>
-    Function();
+Pointer<TfLiteInterpreterOptions> Function() TfLiteInterpreterOptionsCreate =
+    tflitelib
+        .lookup<NativeFunction<_TfLiteInterpreterOptionsCreate_native_t>>(
+            'TfLiteInterpreterOptionsCreate')
+        .asFunction();
+
+typedef _TfLiteInterpreterOptionsCreate_native_t
+    = Pointer<TfLiteInterpreterOptions> Function();
 
 /// Destroys the interpreter options instance.
-void Function(Pointer<TFL_InterpreterOptions>) TFL_DeleteInterpreterOptions =
-    tflitelib
-        .lookup<NativeFunction<_TFL_DeleteInterpreterOptions_native_t>>(
-            'TFL_DeleteInterpreterOptions')
+void Function(Pointer<TfLiteInterpreterOptions>)
+    TfLiteInterpreterOptionsDelete = tflitelib
+        .lookup<NativeFunction<_TfLiteInterpreterOptionsDelete_native_t>>(
+            'TfLiteInterpreterOptionsDelete')
         .asFunction();
-typedef _TFL_DeleteInterpreterOptions_native_t = Void Function(
-    Pointer<TFL_InterpreterOptions>);
+
+typedef _TfLiteInterpreterOptionsDelete_native_t = Void Function(
+    Pointer<TfLiteInterpreterOptions>);
 
 /// Sets the number of CPU threads to use for the interpreter.
-void Function(Pointer<TFL_InterpreterOptions> options, int threads)
-    TFL_InterpreterOptionsSetNumThreads = tflitelib
-        .lookup<NativeFunction<_TFL_InterpreterOptionsSetNumThreads_native_t>>(
-            'TFL_InterpreterOptionsSetNumThreads')
-        .asFunction();
-typedef _TFL_InterpreterOptionsSetNumThreads_native_t = Void Function(
-    Pointer<TFL_InterpreterOptions> options, Int32 threads);
+void Function(
+    Pointer<TfLiteInterpreterOptions> options,
+    int
+        threads) TfLiteInterpreterOptionsSetNumThreads = tflitelib
+    .lookup<NativeFunction<_TfLiteInterpreterOptionsSetNumThreads_native_t>>(
+        'TfLiteInterpreterOptionsSetNumThreads')
+    .asFunction();
+
+typedef _TfLiteInterpreterOptionsSetNumThreads_native_t = Void Function(
+    Pointer<TfLiteInterpreterOptions> options, Int32 threads);
 
 /// Sets a custom error reporter for interpreter execution.
 //
@@ -41,15 +48,16 @@ typedef _TFL_InterpreterOptionsSetNumThreads_native_t = Void Function(
 /// * `user_data` is optional. If provided, it is owned by the client and must
 ///   remain valid for the duration of the interpreter lifetime.
 void Function(
-  Pointer<TFL_InterpreterOptions> options,
+  Pointer<TfLiteInterpreterOptions> options,
   Pointer<NativeFunction<Reporter>> reporter,
   Pointer<Void> user_data,
-) TFL_InterpreterOptionsSetErrorReporter = tflitelib
-    .lookup<NativeFunction<_TFL_InterpreterOptionsSetErrorReporter_native_t>>(
-        'TFL_InterpreterOptionsSetErrorReporter')
+) TfLiteInterpreterOptionsSetErrorReporter = tflitelib
+    .lookup<NativeFunction<_TfLiteInterpreterOptionsSetErrorReporter_native_t>>(
+        'TfLiteInterpreterOptionsSetErrorReporter')
     .asFunction();
-typedef _TFL_InterpreterOptionsSetErrorReporter_native_t = Void Function(
-  Pointer<TFL_InterpreterOptions> options,
+
+typedef _TfLiteInterpreterOptionsSetErrorReporter_native_t = Void Function(
+  Pointer<TfLiteInterpreterOptions> options,
   Pointer<NativeFunction<Reporter>> reporter,
   Pointer<Void> user_data,
 );

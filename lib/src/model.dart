@@ -3,29 +3,28 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:ffi';
-import 'dart:typed_data';
+
+import 'package:ffi/ffi.dart';
 import 'package:quiver/check.dart';
 
-import 'bindings/utf8.dart';
-import 'bindings/buffer.dart';
 import 'bindings/model.dart';
 import 'bindings/types.dart';
 import 'ffi/helper.dart';
 
 /// TensorFlowLite model.
 class Model {
-  final Pointer<TFL_Model> _model;
+  final Pointer<TfLiteModel> _model;
   bool _deleted = false;
 
-  Pointer<TFL_Model> get base => _model;
+  Pointer<TfLiteModel> get base => _model;
 
   Model._(this._model);
 
   /// Loads model from a file or throws if unsuccessful.
   factory Model.fromFile(String path) {
     final cpath = Utf8.toUtf8(path);
-    final model = TFL_NewModelFromFile(cpath);
-    cpath.free();
+    final model = TfLiteModelCreateFromFile(cpath);
+    free(cpath);
     checkArgument(isNotNull(model), message: 'Unable to create model.');
     return Model._(model);
   }
@@ -42,8 +41,10 @@ class Model {
   /// Destroys the model instance.
   void delete() {
     checkState(!_deleted, message: 'Model already deleted.');
-    TFL_DeleteModel(_model);
+    TfLiteModelDelete(_model);
     _deleted = true;
   }
 
+  // Unimplemented:
+  // Model.fromBuffer => TfLiteNewModel
 }
