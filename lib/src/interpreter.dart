@@ -3,7 +3,6 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:ffi';
-import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
 import 'package:quiver/check.dart';
@@ -33,8 +32,8 @@ class Interpreter {
 
   InterpreterSerializable toSerialized() => InterpreterSerializable(_interpreter.address, _deleted, _allocated);
 
-  get unsafeAddress => _interpreter.address;
-  get allocated => _allocated;
+  int get unsafeAddress => _interpreter.address;
+  bool get allocated => _allocated;
   factory Interpreter.fromSerialized(InterpreterSerializable serialized) {
     var interpreter = Pointer<TfLiteInterpreter>.fromAddress(serialized.interpreterAddress);
     return Interpreter._full(interpreter, serialized.deleted, serialized.allocated);
