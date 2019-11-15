@@ -17,7 +17,7 @@ A new flutter plugin project.
   s.dependency 'Flutter'
   # @todo ideally, we should use 'TensorFlowLiteC' only
   # but it does not have `*.modulemap`
-  s.dependency 'TensorFlowLiteObjC', '1.14.0'
+  s.dependency 'TensorFlowLiteObjC', '2.0.0'
   s.static_framework = true
 
   s.ios.deployment_target = '9.0'
