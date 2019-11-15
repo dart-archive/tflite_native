@@ -5,7 +5,7 @@
 import 'dart:ffi';
 import 'dart:io';
 import 'dart:isolate' show Isolate;
-import 'cli_stub.dart' as cli if (dart.library.cli) 'dart:cli';
+import 'cli_stub.dart' as cli if (dart.library.mirrors) 'dart:cli';
 
 const Set<String> _supported = {'linux64', 'mac64', 'win64'};
 
