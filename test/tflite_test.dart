@@ -10,10 +10,9 @@ import 'package:test/test.dart';
 import 'package:tflite_native/tflite.dart' as tfl;
 
 final dataDir = path.join(Directory.current.path, 'testdata');
-
-final dataFile = path.join(dataDir, 'permute_uint8.tflite');
-final missingFile = path.join(dataDir, 'missing.tflite');
-final badFile = path.join(dataDir, 'bad_model.tflite');
+final dataFile = '$dataDir/permute_uint8.tflite';
+final missingFile = '$dataDir/missing.tflite';
+final badFile = '$dataDir/bad_model.tflite';
 
 void main() {
   test('version', () {
