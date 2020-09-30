@@ -6,10 +6,10 @@ import 'dart:ffi';
 import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
-import 'package:quiver/check.dart';
 
 import 'bindings/tensor.dart';
 import 'bindings/types.dart';
+import 'check.dart';
 import 'ffi/helper.dart';
 
 export 'bindings/types.dart' show TfLiteType;
@@ -19,7 +19,7 @@ class Tensor {
   final Pointer<TfLiteTensor> _tensor;
 
   Tensor(this._tensor) {
-    checkNotNull(_tensor);
+    ArgumentError.checkNotNull(_tensor);
   }
 
   /// Name of the tensor element.
