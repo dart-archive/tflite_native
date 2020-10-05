@@ -1,3 +1,7 @@
+# 0.4.0+1
+
+* Removed the dependency on quiver.
+
 # 0.4.0
 
 * Replaced uses of deprecated `asExternalTypedData` with `asTypedList`.
