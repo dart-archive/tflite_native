@@ -4,10 +4,9 @@
 
 import 'dart:ffi';
 
-import 'package:quiver/check.dart';
-
 import 'bindings/interpreter_options.dart';
 import 'bindings/types.dart';
+import 'check.dart';
 
 /// TensorFlowLite interpreter options.
 class InterpreterOptions {

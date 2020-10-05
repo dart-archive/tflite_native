@@ -5,10 +5,10 @@
 import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
-import 'package:quiver/check.dart';
 
 import 'bindings/interpreter.dart';
 import 'bindings/types.dart';
+import 'check.dart';
 import 'ffi/helper.dart';
 import 'interpreter_options.dart';
 import 'model.dart';

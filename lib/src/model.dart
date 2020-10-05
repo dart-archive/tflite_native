@@ -5,10 +5,10 @@
 import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
-import 'package:quiver/check.dart';
 
 import 'bindings/model.dart';
 import 'bindings/types.dart';
+import 'check.dart';
 import 'ffi/helper.dart';
 
 /// TensorFlowLite model.
