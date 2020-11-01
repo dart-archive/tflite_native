@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/dart-lang/tflite_native.svg?branch=master)](https://travis-ci.org/dart-lang/tflite_native)
+[![Build Status](https://github.com/dart-lang/tflite_native/workflows/Dart/badge.svg)](https://github.com/dart-lang/tflite_native/actions)
 
 ## What is it?
 
