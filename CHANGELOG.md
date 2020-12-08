@@ -1,3 +1,7 @@
+# 0.4.1
+
+* Updated the documentation of this package to clarify that is is discontinued.
+
 # 0.4.0+1
 
 * Removed the dependency on quiver.

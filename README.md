@@ -1,5 +1,10 @@
 [![Build Status](https://github.com/dart-lang/tflite_native/workflows/Dart/badge.svg)](https://github.com/dart-lang/tflite_native/actions)
 
+## Status
+
+Note, this package has been **discontinued** - no support or maintenance is
+planned.
+
 ## What is it?
 
 A Dart interface to [TensorFlow Lite (tflite)](https://www.tensorflow.org/lite)
